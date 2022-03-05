@@ -1,6 +1,14 @@
 #include <Arduino.h>
 
 #include "../lib/RotaryEncoderButton/src/RotaryEncoderButton.h"
+#include "../lib/DisplayOLED/src/DisplayOLED.h"
+
+// **********************************************
+// ****************** DEFINES *******************
+#define SCREEN_WIDTH 128    // OLED display width, in pixels
+#define SCREEN_HEIGHT 32    // OLED display height, in pixels
+#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C // < See datasheet for Address; 0x3D for 128x64, 0x3C for 128x32
 
 #define ROW_0 2
 #define ROW_1 3
@@ -25,6 +33,7 @@ void numero();
 // **********************************************
 // ******************* CLASS ********************
 RotaryEncoderButton encoder(A3, A2, BUTTON_ENCODER);
+DisplayOLED display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // **********************************************
 // ***************** VARIABLES ******************
@@ -49,7 +58,7 @@ ISR(TIMER2_OVF_vect)
 void setup()
 {
   Serial.begin(9600); // TODO: Remover
-  Serial.println("Begin");
+  Serial.println("[INFO] Serial iniciado.");
 
   pinMode(ROW_0, INPUT_PULLUP);
   pinMode(ROW_1, INPUT_PULLUP);
@@ -70,11 +79,15 @@ void setup()
   TCNT2 = 100;   // 10ms overflow
   TIMSK2 = 0x01; // Habilitando interrupção do Timer2
 
+  display.beginDisplay(&display, SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS);
+  display.welcomeOLED(&display);
+
   encoder.setPosition(0);
 }
 
 void loop()
 {
+
   encoder.tick();
 
   encoder.newPos = encoder.getPosition();
