@@ -1,5 +1,7 @@
 #include <Arduino.h>
 
+#include "../lib/RotaryEncoderButton/src/RotaryEncoderButton.h"
+
 #define ROW_0 2
 #define ROW_1 3
 #define ROW_2 4
@@ -8,11 +10,21 @@
 #define COL_1 8
 #define COL_2 10
 #define COL_3 11
+
+#define BUTTON_ENCODER 6
+
+#define ROTARYMIN 0 // Quant MENUS MIN and MAX - total = 7
+#define ROTARYMAX 6
+
 // **********************************************
 // ***************** FUNCTIONS ******************
 void readKeyboardMatrix();      // Função para varrer o keyboard
 void storeDigit(uint8_t value); // Função para armazenar o digit do keyboard
 void numero();
+
+// **********************************************
+// ******************* CLASS ********************
+RotaryEncoderButton encoder(A3, A2, BUTTON_ENCODER);
 
 // **********************************************
 // ***************** VARIABLES ******************
@@ -57,10 +69,21 @@ void setup()
   TCCR2B = 0x07; // Prescaler 1:1024
   TCNT2 = 100;   // 10ms overflow
   TIMSK2 = 0x01; // Habilitando interrupção do Timer2
+
+  encoder.setPosition(0);
 }
 
 void loop()
 {
+  encoder.tick();
+
+  encoder.newPos = encoder.getPosition();
+  if (encoder.newPos != encoder.oldPos)
+  {
+    encoder.oldPos = encoder.newPos;
+    Serial.print("Position: ");
+    Serial.println(encoder.newPos);
+  }
 }
 
 // FUNCTIONS KEYBOARD MATRIX
